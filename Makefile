@@ -12,12 +12,6 @@ mandir=$(DESTDIR)$(prefix)/share/man/man1
 datadir=$(DESTDIR)/etc
 udevdir=$(DESTDIR)/etc/udev/rules.d
 
-# Check to see whether we have Jack installed. Needs pkg-config.
-# JACK := $(shell pkg-config --libs jack 2>/dev/null)
-
-
-#CPPFLAGS += $(JACK_DEF)
-
 OBJ = shuttlepro.o
 
 # Only try to install the manual page if it's actually there, to prevent
@@ -80,14 +74,9 @@ uninstall-udev:
 	rm -f $(bindir)/shuttle-hotplug $(addprefix $(udevdir)/, $(notdir $(udev-rules)))
 
 clean:
-	rm -f shuttlepro keys.h $(OBJ)
+	rm -f shuttlepro $(OBJ)
 
 realclean:
-	rm -f shuttlepro shuttlepro.1 shuttlepro.pdf keys.h $(OBJ)
-
-keys.h: keys.sed /usr/include/X11/keysymdef.h
-	sed -f keys.sed < /usr/include/X11/keysymdef.h > keys.h
-
-readconfig.o: shuttle.h keys.h
+	rm -f shuttlepro shuttlepro.1 shuttlepro.pdf $(OBJ)
 
 shuttlepro.o: shuttle.h
