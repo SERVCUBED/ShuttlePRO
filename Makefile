@@ -1,6 +1,7 @@
 
 # Copyright 2013 Eric Messick (FixedImagePhoto.com/Contact)
 # Copyright 2018 Albert Graef (aggraef@gmail.com)
+# Copyright 2019 Ben Blain (servc.eu/contact)
 
 #CFLAGS=-g -W -Wall
 CFLAGS=-O3 -W -Wall
