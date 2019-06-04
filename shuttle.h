@@ -1,7 +1,7 @@
 
 // Copyright 2013 Eric Messick (FixedImagePhoto.com/Contact)
 // Copyright 2018 Albert Graef <aggraef@gmail.com>
-
+// Copyright 2019 Ben Blain <servc.eu/contact>
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include <linux/input.h>
 
@@ -28,18 +29,45 @@
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
 
+#define unlikely(expr) __builtin_expect(!!(expr), 0)
+#define   likely(expr) __builtin_expect(!!(expr), 1)
 
 // delay in ms before processing each XTest event
 // CurrentTime means no delay
 #define DELAY CurrentTime
 
+#define MAX_EV_NUM 6
+
 // protocol for events from the shuttlepro HUD device
 //
 // ev.type values:
-#define EVENT_TYPE_DONE 0
-#define EVENT_TYPE_KEY 1
-#define EVENT_TYPE_JOGSHUTTLE 2
-#define EVENT_TYPE_ACTIVE_KEY 4
+// EV_SYN 0
+// EV_KEY 1
+// EV_REL 2
+// EV_MSC 4
+
+/*
+ * Button:
+ * EV_REL REL_DIAL same
+ * EV_MSC MSC_SCAN
+ * EV_KEY code val/1
+ * EV_SYN
+ *
+ * Side button, shuttle release:
+ * EV_REL REL_DIAL same
+ * EV_SYN
+ * Shuttle release if |shuttevalue|=1
+ *
+ * Jog:
+ * EV_REL REL_DIAL +-1
+ * EV_SYN
+ *
+ * Shuttle:
+ * EV_REL REL_WHEEL val/7,+-1
+ * EV_REL 11 val/840 ignore
+ * EV_REL REL_DIAL same or +-1
+ * EV_SYN
+ */
 
 // ev.code when ev.type == KEY
 #define EVENT_CODE_KEY1 256
@@ -51,6 +79,7 @@
 // ev.code when ev.type == JOGSHUTTLE
 #define EVENT_CODE_JOG 7
 #define EVENT_CODE_SHUTTLE 8
+#define EVENT_CODE_UNKNOWN 11
 
 // ev.value when ev.code == JOG
 // 8 bit value changing by one for each jog step
@@ -63,6 +92,8 @@
 #define XK_Button_1 0x2000001
 #define XK_Button_2 0x2000002
 #define XK_Button_3 0x2000003
+#define XK_Button_8 0x2000008
+#define XK_Button_9 0x2000009
 #define XK_Scroll_Up 0x2000004
 #define XK_Scroll_Down 0x2000005
 
@@ -71,7 +102,7 @@
 #define PRESS_RELEASE 3
 #define HOLD 4
 
-#define NUM_KEYS 15
+#define NUM_KEYS 13
 #define NUM_SHUTTLES 15
 #define NUM_SHUTTLE_INCRS 2
 #define NUM_JOGS 2
@@ -109,10 +140,6 @@ typedef struct _translation {
   stroke *jog[NUM_JOGS];
 } translation;
 
-extern int read_config_file(void);
-extern translation *get_translation(char *win_title, char *win_class);
 extern void print_stroke_sequence(char *name, char *up_or_down, stroke *s);
 extern int debug_regex, debug_strokes, debug_keys;
 extern int default_debug_regex, default_debug_strokes, default_debug_keys;
-extern int midi_octave;
-extern char *config_file_name;

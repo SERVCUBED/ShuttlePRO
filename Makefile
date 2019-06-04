@@ -12,16 +12,12 @@ datadir=$(DESTDIR)/etc
 udevdir=$(DESTDIR)/etc/udev/rules.d
 
 # Check to see whether we have Jack installed. Needs pkg-config.
-JACK := $(shell pkg-config --libs jack 2>/dev/null)
+# JACK := $(shell pkg-config --libs jack 2>/dev/null)
 
-ifneq ($(JACK),)
-JACK_DEF = -DHAVE_JACK=1
-JACK_OBJ = jackdriver.o
-endif
 
-CPPFLAGS += $(JACK_DEF)
+#CPPFLAGS += $(JACK_DEF)
 
-OBJ = readconfig.o shuttlepro.o $(JACK_OBJ)
+OBJ = shuttlepro.o
 
 # Only try to install the manual page if it's actually there, to prevent
 # errors if pandoc isn't installed.
@@ -46,7 +42,7 @@ uninstall:
 	rm -f $(bindir)/shuttlepro $(mandir)/shuttlepro.1 $(datadir)/shuttlerc
 
 shuttlepro: $(OBJ)
-	gcc $(CFLAGS) $(OBJ) -o shuttlepro -L /usr/X11R6/lib -lX11 -lXtst $(JACK)
+	gcc $(CFLAGS) $(OBJ) -o shuttlepro -L /usr/X11R6/lib -lX11 -lXtst
 
 # This creates the manual page from the README. Requires pandoc
 # (http://pandoc.org/).
@@ -92,9 +88,5 @@ keys.h: keys.sed /usr/include/X11/keysymdef.h
 	sed -f keys.sed < /usr/include/X11/keysymdef.h > keys.h
 
 readconfig.o: shuttle.h keys.h
-ifneq ($(JACK),)
-jackdriver.o: jackdriver.h
-shuttlepro.o: shuttle.h jackdriver.h
-else
+
 shuttlepro.o: shuttle.h
-endif

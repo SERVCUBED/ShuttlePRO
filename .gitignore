@@ -5,3 +5,9 @@ shuttlepro
 *.o
 
 *~
+
+cmake-build-debug/
+
+\.idea/
+
+CMakeFiles/
