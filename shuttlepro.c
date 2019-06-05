@@ -429,7 +429,7 @@ main (int argc, char **argv)
               first_time = 0;
               while (!quit)
                 {
-                  nread = read (fd, &ev, sizeof (ev) * MAX_EV_NUM);
+                  nread = read (fd, &ev, sizeof (ev));
                   if (nread < 0 && (hotplug || quit))
                     {
                       quit = 1;
