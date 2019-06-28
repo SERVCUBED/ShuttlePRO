@@ -33,6 +33,9 @@
 #define unlikely(expr) __builtin_expect(!!(expr), 0)
 #define   likely(expr) __builtin_expect(!!(expr), 1)
 
+#define errf(f, args...) fprintf(stderr, f, ##args)
+#define prnf(f, args...) fprintf(stdout, f, ##args)
+
 // delay in ms before processing each XTest event
 // CurrentTime means no delay
 #define DELAY CurrentTime

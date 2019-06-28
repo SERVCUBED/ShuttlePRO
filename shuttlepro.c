@@ -68,12 +68,12 @@ initdisplay (void)
   display = XOpenDisplay (0);
   if (!display)
     {
-      fprintf (stderr, "unable to open X display\n");
+      errf ("unable to open X display\n");
       exit (1);
     }
   if (!XTestQueryExtension (display, &event, &error, &major, &minor))
     {
-      fprintf (stderr, "Xtest extensions not supported\n");
+      errf ("Xtest extensions not supported.\n");
       XCloseDisplay (display);
       exit (1);
     }
@@ -85,7 +85,7 @@ initdisplay (void)
     }
 }
 
-inline const keymapValue *getKeymap(uint16_t code)
+const keymapValue *getKeymap(uint16_t code)
 {
   int i = 0;
   for (; i < NUM_KEYMAPS - 1; ++i)
@@ -97,10 +97,10 @@ inline const keymapValue *getKeymap(uint16_t code)
   return &keymap[i][code];
 }
 
-inline void
+void
 send_button (unsigned int button, unsigned int press)
 {
-  printf ("send_button (%d, %d)\n", button, press);
+  prnf ("send_button (%d, %d)\n", button, press);
   XTestFakeButtonEvent (display, button, press, DELAY);
 }
 
@@ -111,7 +111,7 @@ send_button_to_active (unsigned int button, unsigned int press)
   XTestFakeButtonEvent (display, button, press, DELAY);
 }
 
-inline void
+void
 send_key (KeyCode keycode, unsigned int press)
 {
   XTestFakeKeyEvent (display, keycode, press, DELAY);
@@ -125,7 +125,7 @@ key (unsigned short code, unsigned int value)
   if (likely(code <= NUM_KEYS))
     {
       const keymapValue *km;
-      fprintf (stdout, "Key: %d %d\n", code, value);
+      prnf ("Key: %d %d\n", code, value);
 
       km = getKeymap (code);
       switch (km->code)
@@ -133,7 +133,7 @@ key (unsigned short code, unsigned int value)
           case 0b00:
             if (!km->value)
               {
-                fprintf (stderr, "key(%d) unbound\n", code);
+                errf ("key(%d) unbound\n", code);
                 return;
               }
             send_key (km->value, value);
@@ -157,14 +157,14 @@ key (unsigned short code, unsigned int value)
     }
   else
     {
-      fprintf (stderr, "key(%d, %d) out of range\n", code + EVENT_CODE_KEY1, value);
+      errf ("key(%d, %d) out of range\n", code + EVENT_CODE_KEY1, value);
     }
 }
 
 void
 shuttle (int value)
 {
-  fprintf (stdout, "Shuttle: %d\n", value);
+  prnf ("Shuttle: %d\n", value);
   // if value = 0 stop timer
   // [if last value = 0,] start timer with delay = kbd_interval * (1-|value|/7)
 }
@@ -172,7 +172,7 @@ shuttle (int value)
 void
 jog (bool direction)
 {
-  fprintf (stdout, "Jog: %d\n", direction);
+  prnf ("Jog: %d\n", direction);
   send_button (direction? 4 : 5, 1);
   send_button (direction? 4 : 5, 0);
   XFlush (display);
@@ -227,12 +227,12 @@ handle_event (EV ev, int count)
 
 void help (char *progname)
 {
-  fprintf (stderr, "Usage: %s [-h] [-o] [-p] [-d[rsk]] [device]\n", progname);
-  fprintf (stderr, "-h print this message\n");
-  fprintf (stderr, "-p enable hot-plugging\n");
-  fprintf (stderr, "-d debug (r = regex, s = strokes, k = keys; default: all)\n");
-  fprintf (stderr, "device, if specified, is the name of the shuttle device to open.\n");
-  fprintf (stderr, "Otherwise the program will try to find a suitable device on its own.\n");
+  errf ("Usage: %s [-h] [-o] [-p] [-d[rsk]] [device]\n", progname);
+  errf ("-h print this message\n");
+  errf ("-p enable hot-plugging\n");
+  errf ("-d debug (r = regex, s = strokes, k = keys; default: all)\n");
+  errf ("device, if specified, is the name of the shuttle device to open.\n");
+  errf ("Otherwise the program will try to find a suitable device on its own.\n");
 }
 
 #include <glob.h>
@@ -355,8 +355,8 @@ main (int argc, char **argv)
 //                          default_debug_keys = 1;
                         break;
                         default:
-                          fprintf (stderr, "%s: unknown debugging option (-d), must be r, s, or k\n", argv[0]);
-                        fprintf (stderr, "Try -h for help.\n");
+                          errf ("%s: unknown debugging option (-d), must be r, s, or k\n", argv[0]);
+                        errf ("Try -h for help.\n");
                         exit (1);
                       }
                     ++a;
@@ -377,7 +377,7 @@ main (int argc, char **argv)
           add_command (absolute_path (optarg));
           break;
           default:
-            fprintf (stderr, "Try -h for help.\n");
+            errf ("Try -h for help.\n");
           exit (1);
         }
     }
@@ -396,16 +396,16 @@ main (int argc, char **argv)
       if (glob ("/dev/input/by-id/usb-*Shuttle*-event-if*",
                 0, NULL, &globbuf))
         {
-          fprintf (stderr, "%s: found no suitable shuttle device\n", argv[0]);
-          fprintf (stderr, "Please make sure that your shuttle device is connected.\n");
-          fprintf (stderr, "You can also specify the device name on the command line.\n");
-          fprintf (stderr, "Try -h for help.\n");
+          errf ("%s: found no suitable shuttle device\n", argv[0]);
+          errf ("Please make sure that your shuttle device is connected.\n");
+          errf ("You can also specify the device name on the command line.\n");
+          errf ("Try -h for help.\n");
           exit (1);
         }
       else
         {
           dev_name = globbuf.gl_pathv[0];
-          fprintf (stderr, "%s: found shuttle device:\n%s\n", argv[0], dev_name);
+          errf ("%s: found shuttle device:\n%s\n", argv[0], dev_name);
         }
     }
   else
@@ -455,7 +455,7 @@ main (int argc, char **argv)
                         }
                       else
                         {
-                          fprintf (stderr, "short read: %d\n", nread);
+                          errf ("short read: %d\n", nread);
                           break;
                         }
                     }
