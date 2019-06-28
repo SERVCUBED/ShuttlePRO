@@ -27,6 +27,8 @@ unsigned short jogvalue = 0;
 int shuttlevalue = 0;
 uint16_t buttonsPressed = 0;
 
+unsigned int kbd_interval = 200;
+
 #define ISPRESSED(btn) ISSET(buttonsPressed, btn)
 
 #define NUM_KEYMAP_COMMANDS 4
@@ -60,7 +62,8 @@ Display *display;
 void
 initdisplay (void)
 {
-  int event, error, major, minor;
+  int event, opcode, error, major, minor;
+  unsigned int kbd_delay;
 
   display = XOpenDisplay (0);
   if (!display)
@@ -73,6 +76,12 @@ initdisplay (void)
       fprintf (stderr, "Xtest extensions not supported\n");
       XCloseDisplay (display);
       exit (1);
+    }
+  if (XkbQueryExtension (display, &opcode, &event, &error, &major, &minor))
+    XkbGetAutoRepeatRate (display, XkbUseCoreKbd, &kbd_delay, &kbd_interval);
+  else
+    {
+      errf ("Xkb extensions not supported. Continuing with default values.\n");
     }
 }
 
@@ -156,6 +165,8 @@ void
 shuttle (int value)
 {
   fprintf (stdout, "Shuttle: %d\n", value);
+  // if value = 0 stop timer
+  // [if last value = 0,] start timer with delay = kbd_interval * (1-|value|/7)
 }
 
 void
