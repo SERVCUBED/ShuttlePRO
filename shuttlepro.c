@@ -230,7 +230,7 @@ handle_event (EV ev, int count)
 
 void help (char *progname)
 {
-  errf ("Usage: %s [-h] [-o] [-p] [device]\n", progname);
+  errf ("Usage: %s [-h] [-p] [device]\n", progname);
   errf ("-h print this message\n");
   errf ("-p enable hot-plugging\n");
   errf ("device, if specified, is the name of the shuttle device to open.\n");
@@ -238,69 +238,6 @@ void help (char *progname)
 }
 
 #include <glob.h>
-
-// Helper functions to process the command line, so that we can pass it to
-// Jack session management.
-
-static char *command_line;
-static size_t len;
-
-static void add_command (char *arg)
-{
-  char *a = arg;
-  // Do some simplistic quoting if the argument contains blanks. This won't do
-  // the right thing if the argument also contains quotes. Oh well.
-  if ((strchr (a, ' ') || strchr (a, '\t')) && !strchr (a, '"'))
-    {
-      a = malloc (strlen (arg) + 3);
-      sprintf (a, "\"%s\"", arg);
-    }
-  if (!command_line)
-    {
-      len = strlen (a);
-      command_line = malloc (len + 1);
-      strcpy (command_line, a);
-    }
-  else
-    {
-      size_t l = strlen (a) + 1;
-      command_line = realloc (command_line, len + l + 1);
-      command_line[len] = ' ';
-      strcpy (command_line + len + 1, a);
-      len += l;
-    }
-  if (a != arg) free (a);
-}
-
-static char *absolute_path (char *name)
-{
-  if (*name == '/')
-    {
-      return name;
-    }
-  else
-    {
-      // This is a relative pathname, we turn it into a canonicalized absolute
-      // path.  NOTE: This requires glibc. We should probably rewrite this code
-      // to be more portable.
-      char *pwd = getcwd (NULL, 0);
-      if (!pwd)
-        {
-          perror ("getcwd");
-          return name;
-        }
-      else
-        {
-          char *path = malloc (strlen (pwd) + strlen (name) + 2);
-          static char abspath[PATH_MAX];
-          sprintf (path, "%s/%s", pwd, name);
-          if (!realpath (path, abspath)) strcpy (abspath, path);
-          free (path);
-          free (pwd);
-          return abspath;
-        }
-    }
-}
 
 uint8_t quit = 0;
 
@@ -322,10 +259,7 @@ main (int argc, char **argv)
   };
   int opt;
 
-  // Start recording the command line to be passed to Jack session management.
-  add_command (argv[0]);
-
-  while ((opt = getopt (argc, argv, "hop::r:")) != -1)
+  while ((opt = getopt (argc, argv, "hp::")) != -1)
     {
       switch (opt)
         {
@@ -334,17 +268,6 @@ main (int argc, char **argv)
             exit (0);
           case 'p':
             o.hotplug = 1;
-            add_command ("-p");
-            break;
-          case 'o':
-            break;
-          case 'j':
-            break;
-          case 'r':
-            add_command ("-r");
-            // We need to convert this to an absolute pathname for Jack session
-            // management.
-            add_command (absolute_path (optarg));
             break;
           default:
             errf ("Try -h for help.\n");

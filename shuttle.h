@@ -22,8 +22,6 @@
 #include <errno.h>
 #include <time.h>
 
-#include <regex.h>
-
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 #include <X11/XKBlib.h>
@@ -91,25 +89,7 @@
 // ev.value when ev.code == SHUTTLE
 // -7 .. 7 encoding shuttle position
 
-// we define these as extra KeySyms to represent mouse events
-#define XK_Button_0 0x2000000 // just an offset, not a real button
-#define XK_Button_1 0x2000001
-#define XK_Button_2 0x2000002
-#define XK_Button_3 0x2000003
-#define XK_Button_8 0x2000008
-#define XK_Button_9 0x2000009
-#define XK_Scroll_Up 0x2000004
-#define XK_Scroll_Down 0x2000005
-
-#define PRESS 1
-#define RELEASE 2
-#define PRESS_RELEASE 3
-#define HOLD 4
-
 #define NUM_KEYS 13
-#define NUM_SHUTTLES 15
-#define NUM_SHUTTLE_INCRS 2
-#define NUM_JOGS 2
 
 #pragma pack(1)
 typedef struct mainopts
