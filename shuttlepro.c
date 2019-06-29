@@ -19,12 +19,12 @@
 
 #include "shuttle.h"
 
-#define ISSET(var, pos) ((var)&(1<<(pos)))
+#define ISSET(var, pos) ((var)&(1u<<(pos)))
 
 typedef struct input_event EV[MAX_EV_NUM];
 
 unsigned short jogvalue = 0;
-int shuttlevalue = 0;
+short shuttlevalue = 0;
 uint16_t buttonsPressed = 0;
 
 unsigned int kbd_interval = 200;
@@ -57,7 +57,7 @@ const uint16_t keymapsMask[NUM_KEYMAPS - 1] = {1u << 10u, 1u << 9u};
 const keymapValue keymap[NUM_KEYMAPS][NUM_KEYS] = {
     {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0,                  0}, {0,                      0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
     {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0,                  0}, {0,                      0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
-    {{1, 1}, {3, 1}, {0, 3}, {1, 3}, {XK_Pointer_Button1, 0}, {XK_Pointer_DfltBtnPrev, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
+    {{1, 1}, {3, 1}, {0, 3}, {1, 3}, {XK_Pointer_Button1, 0}, {XK_Pointer_DfltBtnPrev, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {37, 0}, {0, 0}, {0, 0}}};
 
 Display *display;
 
@@ -115,8 +115,9 @@ send_button_to_active (unsigned int button, unsigned int press)
 }
 
 void
-send_key (KeyCode keycode, unsigned int press)
+send_key (unsigned int keycode, unsigned int press)
 {
+  prnf ("send_key (%d, %d)\n", keycode, press);
   XTestFakeKeyEvent (display, keycode, press, DELAY);
 }
 
@@ -130,6 +131,10 @@ key (unsigned short code, unsigned int value)
       const keymapValue *km;
       prnf ("Key: %d %d\n", code, value);
 
+      if (value)
+        buttonsPressed |= (1u << code);
+      else
+        buttonsPressed ^= (1u << code);
       km = getKeymap (code);
       switch (km->code)
         {
@@ -176,8 +181,20 @@ void
 jog (bool direction)
 {
   prnf ("Jog: %d\n", direction);
-  send_button (direction ? 4 : 5, 1);
-  send_button (direction ? 4 : 5, 0);
+  if (ISPRESSED (10u))
+    {
+      if (!direction)
+        send_key (50, 1);
+      send_key (23, 1);
+      send_key (23, 0);
+      if (!direction)
+        send_key (50, 0);
+    }
+  else
+    {
+      send_button (direction ? 4 : 5, 1);
+      send_button (direction ? 4 : 5, 0);
+    }
   XFlush (display);
 }
 
