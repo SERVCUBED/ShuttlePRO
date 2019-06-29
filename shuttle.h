@@ -111,39 +111,11 @@
 #define NUM_SHUTTLE_INCRS 2
 #define NUM_JOGS 2
 
-typedef struct _stroke {
-  struct _stroke *next;
-  // nonzero keysym indicates a key event
-  KeySym keysym;
-  int press; // zero -> release, non-zero -> press
-  // keysym == 0 => MIDI event
-  int status, data; // status and, if applicable, first data byte
-  // the incremental bit indicates an incremental control change (typically
-  // used with endless rotary encoders) to be represented as a sign bit value
-  uint8_t incr;
-  // the dirty bit indicates a MIDI event for which a release event still
-  // needs to be generated in key events
-  uint8_t dirty;
-} stroke;
-
-#define KJS_KEY_DOWN 1
-#define KJS_KEY_UP 2
-#define KJS_SHUTTLE 3
-#define KJS_SHUTTLE_INCR 4
-#define KJS_JOG 5
-
-typedef struct _translation {
-  struct _translation *next;
-  char *name;
-  int is_default;
-  regex_t regex;
-  stroke *key_down[NUM_KEYS];
-  stroke *key_up[NUM_KEYS];
-  stroke *shuttle[NUM_SHUTTLES];
-  stroke *shuttle_incr[NUM_SHUTTLE_INCRS];
-  stroke *jog[NUM_JOGS];
-} translation;
-
-extern void print_stroke_sequence(char *name, char *up_or_down, stroke *s);
-extern int debug_regex, debug_strokes, debug_keys;
-extern int default_debug_regex, default_debug_strokes, default_debug_keys;
+#pragma pack(1)
+typedef struct mainopts
+{
+    int nread, fd;
+    unsigned first_time:1;
+    unsigned hotplug:1;
+} mainopts;
+#pragma pack(0)

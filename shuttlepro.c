@@ -33,12 +33,14 @@ unsigned int kbd_interval = 200;
 
 #define NUM_KEYMAP_COMMANDS 4
 typedef struct _keymapcommand {
-    void (*f)(char *);
+    void (*f) (char *);
     char *arg;
 } keymapCommand;
 
-void _printf(char *a) { printf("%s\n", a); }
-keymapCommand keymapCommands[NUM_KEYMAP_COMMANDS] = { { &_printf, "Command 1"}, { &_printf, "Command 2"}};
+void _printf (char *a)
+{ printf ("%s\n", a); }
+keymapCommand keymapCommands[NUM_KEYMAP_COMMANDS] = {{&_printf, "Command 1"},
+                                                     {&_printf, "Command 2"}};
 
 typedef struct _keymapvalue {
     uint value:29;
@@ -53,9 +55,9 @@ typedef struct _keymapvalue {
 
 const uint16_t keymapsMask[NUM_KEYMAPS - 1] = {1u << 10u, 1u << 9u};
 const keymapValue keymap[NUM_KEYMAPS][NUM_KEYS] = {
-    { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-    { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-    { { 1, 1 }, { 3, 1 }, { 0, 3 }, { 1, 3 }, { XK_Pointer_Button1, 0 }, { XK_Pointer_DfltBtnPrev, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } };
+    {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0,                  0}, {0,                      0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
+    {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0,                  0}, {0,                      0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
+    {{1, 1}, {3, 1}, {0, 3}, {1, 3}, {XK_Pointer_Button1, 0}, {XK_Pointer_DfltBtnPrev, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}};
 
 Display *display;
 
@@ -85,13 +87,14 @@ initdisplay (void)
     }
 }
 
-const keymapValue *getKeymap(uint16_t code)
+const keymapValue *getKeymap (uint16_t code)
 {
   int i = 0;
   for (; i < NUM_KEYMAPS - 1; ++i)
     {
       // We can see the first element is statically all zero, so compare with it
-      if (unlikely(buttonsPressed & keymapsMask[i] && memcmp (&keymap[0][0], &keymap[i][code], sizeof (keymapValue)) != 0))
+      if (unlikely(
+          buttonsPressed & keymapsMask[i] && memcmp (&keymap[0][0], &keymap[i][code], sizeof (keymapValue)) != 0))
         return &keymap[i][code];
     }
   return &keymap[i][code];
@@ -136,21 +139,21 @@ key (unsigned short code, unsigned int value)
                 errf ("key(%d) unbound\n", code);
                 return;
               }
-            send_key (km->value, value);
-            break;
+          send_key (km->value, value);
+          break;
           case 0b01:
             send_button (km->value, value);
-            break;
+          break;
           case 0b10:
             send_button_to_active (km->value, value);
-            break;
+          break;
           case 0b11:
             if (value)
               {
                 keymapCommand kc = keymapCommands[km->value];
                 kc.f (kc.arg);
               }
-            return;
+          return;
         }
       // Switch to XSync instead?
       XFlush (display);
@@ -173,8 +176,8 @@ void
 jog (bool direction)
 {
   prnf ("Jog: %d\n", direction);
-  send_button (direction? 4 : 5, 1);
-  send_button (direction? 4 : 5, 0);
+  send_button (direction ? 4 : 5, 1);
+  send_button (direction ? 4 : 5, 0);
   XFlush (display);
 }
 
@@ -200,37 +203,36 @@ handle_event (EV ev, int count)
 
                 break;
               }
-            if (ev[i].code == REL_DIAL) // Jog
-              {
-                if (ev[i].value == jogvalue)
-                  {
-                    if (!hasWheelEV && (uint) shuttlevalue & 1u && count < 3)
-                      {
-                        shuttle (0);
-                        shuttlevalue = 0;
-                      }
-                    break;
-                  }
-                if (((uint) ev[i].value ^ (uint) jogvalue) & 1u)
-                  {
-                    jog (ev[i].value > jogvalue);
-                  }
-                jogvalue = ev[i].value;
-              }
-            break;
+          if (ev[i].code == REL_DIAL) // Jog
+            {
+              if (ev[i].value == jogvalue)
+                {
+                  if (!hasWheelEV && (uint) shuttlevalue & 1u && count < 3)
+                    {
+                      shuttle (0);
+                      shuttlevalue = 0;
+                    }
+                  break;
+                }
+              if (((uint) ev[i].value ^ (uint) jogvalue) & 1u)
+                {
+                  jog (ev[i].value > jogvalue);
+                }
+              jogvalue = ev[i].value;
+            }
+          break;
           case EV_KEY:
             key (ev[i].code, ev[i].value);
-            break;
+          break;
         }
     }
 }
 
 void help (char *progname)
 {
-  errf ("Usage: %s [-h] [-o] [-p] [-d[rsk]] [device]\n", progname);
+  errf ("Usage: %s [-h] [-o] [-p] [device]\n", progname);
   errf ("-h print this message\n");
   errf ("-p enable hot-plugging\n");
-  errf ("-d debug (r = regex, s = strokes, k = keys; default: all)\n");
   errf ("device, if specified, is the name of the shuttle device to open.\n");
   errf ("Otherwise the program will try to find a suitable device on its own.\n");
 }
@@ -311,71 +313,39 @@ int
 main (int argc, char **argv)
 {
   EV ev;
-  int evsize = sizeof (struct input_event);
-  int nread;
+  const int evsize = sizeof (struct input_event);
   char *dev_name;
-  int fd;
-  int first_time = 1;
-  int opt, hotplug = 0;
+  // Put these single bit fields in a structure to save memory
+  struct mainopts o = {
+      .first_time = 1,
+      .hotplug = 0
+  };
+  int opt;
 
   // Start recording the command line to be passed to Jack session management.
   add_command (argv[0]);
 
-  while ((opt = getopt (argc, argv, "hopd::r:")) != -1)
+  while ((opt = getopt (argc, argv, "hop::r:")) != -1)
     {
       switch (opt)
         {
           case 'h':
             help (argv[0]);
-          exit (0);
+            exit (0);
           case 'p':
-            hotplug = 1;
-          add_command ("-p");
-          break;
+            o.hotplug = 1;
+            add_command ("-p");
+            break;
           case 'o':
             break;
-          case 'd':
-            if (optarg && *optarg)
-              {
-                const char *a = optarg;
-                char buf[100];
-                snprintf (buf, 100, "-d%s", optarg);
-                add_command (buf);
-                while (*a)
-                  {
-                    switch (*a)
-                      {
-                        case 'r':
-//                          default_debug_regex = 1;
-                        break;
-                        case 's':
-//                          default_debug_strokes = 1;
-                        break;
-                        case 'k':
-//                          default_debug_keys = 1;
-                        break;
-                        default:
-                          errf ("%s: unknown debugging option (-d), must be r, s, or k\n", argv[0]);
-                        errf ("Try -h for help.\n");
-                        exit (1);
-                      }
-                    ++a;
-                  }
-              }
-            else
-              {
-//                default_debug_regex = default_debug_strokes = default_debug_keys = 1;
-                add_command ("-d");
-              }
-          break;
           case 'j':
             break;
           case 'r':
-          add_command ("-r");
-          // We need to convert this to an absolute pathname for Jack session
-          // management.
-          add_command (absolute_path (optarg));
-          break;
+            add_command ("-r");
+            // We need to convert this to an absolute pathname for Jack session
+            // management.
+            add_command (absolute_path (optarg));
+            break;
           default:
             errf ("Try -h for help.\n");
           exit (1);
@@ -419,11 +389,11 @@ main (int argc, char **argv)
   sigaction (SIGINT, &int_handler, 0);
   while (!quit)
     {
-      fd = open (dev_name, O_RDONLY);
-      if (fd < 0)
+      o.fd = open (dev_name, O_RDONLY);
+      if (o.fd < 0)
         {
           perror (dev_name);
-          if (first_time)
+          if (o.first_time)
             {
               exit (1);
             }
@@ -431,42 +401,42 @@ main (int argc, char **argv)
       else
         {
           // Flag it as exclusive access
-          if (ioctl (fd, EVIOCGRAB, 1) < 0)
+          if (ioctl (o.fd, EVIOCGRAB, 1) < 0)
             {
               perror ("evgrab ioctl");
             }
           else
             {
-              first_time = 0;
+              o.first_time = 0;
               while (!quit)
                 {
-                  nread = read (fd, &ev, sizeof (ev));
-                  if (nread < 0 && (hotplug || quit))
+                  o.nread = read (o.fd, &ev, sizeof (ev));
+                  if (o.nread < 0 && (o.hotplug || quit))
                     {
                       quit = 1;
                       break;
                     }
-                  if (nread < evsize)
+                  if (o.nread < evsize)
                     {
-                      if (nread < 0)
+                      if (o.nread < 0)
                         {
                           perror ("read event");
                           break;
                         }
                       else
                         {
-                          errf ("short read: %d\n", nread);
+                          errf ("short read: %d\n", o.nread);
                           break;
                         }
                     }
                   else
                     {
-                      handle_event (ev, nread / evsize);
+                      handle_event (ev, o.nread / evsize);
                     }
                 }
             }
         }
-      close (fd);
+      close (o.fd);
       if (!quit) sleep (1);
     }
 }
