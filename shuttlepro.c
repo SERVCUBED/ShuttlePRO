@@ -70,12 +70,12 @@ initdisplay (void)
   display = XOpenDisplay (0);
   if (!display)
     {
-      errf ("unable to open X display\n");
+      errf ("unable to open X display");
       exit (1);
     }
   if (!XTestQueryExtension (display, &event, &error, &major, &minor))
     {
-      errf ("Xtest extensions not supported.\n");
+      errf ("Xtest extensions not supported.");
       XCloseDisplay (display);
       exit (1);
     }
@@ -83,7 +83,7 @@ initdisplay (void)
     XkbGetAutoRepeatRate (display, XkbUseCoreKbd, &kbd_delay, &kbd_interval);
   else
     {
-      errf ("Xkb extensions not supported. Continuing with default values.\n");
+      errf ("Xkb extensions not supported. Continuing with default values.");
     }
 }
 
@@ -103,7 +103,7 @@ const keymapValue *getKeymap (uint16_t code)
 void
 send_button (unsigned int button, unsigned int press)
 {
-  prnf ("send_button (%d, %d)\n", button, press);
+  prnf ("send_button (%d, %d)", button, press);
   XTestFakeButtonEvent (display, button, press, DELAY);
 }
 
@@ -117,7 +117,7 @@ send_button_to_active (unsigned int button, unsigned int press)
 void
 send_key (unsigned int keycode, unsigned int press)
 {
-  prnf ("send_key (%d, %d)\n", keycode, press);
+  prnf ("send_key (%d, %d)", keycode, press);
   XTestFakeKeyEvent (display, keycode, press, DELAY);
 }
 
@@ -129,7 +129,7 @@ key (unsigned short code, unsigned int value)
   if (likely(code <= NUM_KEYS))
     {
       const keymapValue *km;
-      prnf ("Key: %d %d\n", code, value);
+      prnf ("Key: %d %d", code, value);
 
       if (value)
         buttonsPressed |= (1u << code);
@@ -141,7 +141,7 @@ key (unsigned short code, unsigned int value)
           case 0b00:
             if (!km->value)
               {
-                errf ("key(%d) unbound\n", code);
+                errf ("key(%d) unbound", code);
                 return;
               }
           send_key (km->value, value);
@@ -165,7 +165,7 @@ key (unsigned short code, unsigned int value)
     }
   else
     {
-      errf ("key(%d, %d) out of range\n", code + EVENT_CODE_KEY1, value);
+      errf ("key(%d, %d) out of range", code + EVENT_CODE_KEY1, value);
     }
 }
 
@@ -180,7 +180,7 @@ shuttle (int value)
 void
 jog (bool direction)
 {
-  prnf ("Jog: %d\n", direction);
+  prnf ("Jog: %d", direction);
   if (ISPRESSED (10u))
     {
       if (!direction)
@@ -247,11 +247,11 @@ handle_event (EV ev, int count)
 
 void help (char *progname)
 {
-  errf ("Usage: %s [-h] [-p] [device]\n", progname);
-  errf ("-h print this message\n");
-  errf ("-p enable hot-plugging\n");
-  errf ("device, if specified, is the name of the shuttle device to open.\n");
-  errf ("Otherwise the program will try to find a suitable device on its own.\n");
+  errf ("Usage: %s [-h] [-p] [device]", progname);
+  errf ("-h print this message");
+  errf ("-p enable hot-plugging");
+  errf ("device, if specified, is the name of the shuttle device to open.");
+  errf ("Otherwise the program will try to find a suitable device on its own.");
 }
 
 #include <glob.h>
@@ -287,7 +287,7 @@ main (int argc, char **argv)
             o.hotplug = 1;
             break;
           default:
-            errf ("Try -h for help.\n");
+            errf ("Try -h for help.");
           exit (1);
         }
     }
@@ -306,16 +306,16 @@ main (int argc, char **argv)
       if (glob ("/dev/input/by-id/usb-*Shuttle*-event-if*",
                 0, NULL, &globbuf))
         {
-          errf ("%s: found no suitable shuttle device\n", argv[0]);
-          errf ("Please make sure that your shuttle device is connected.\n");
-          errf ("You can also specify the device name on the command line.\n");
-          errf ("Try -h for help.\n");
+          errf ("%s: found no suitable shuttle device", argv[0]);
+          errf ("Please make sure that your shuttle device is connected.");
+          errf ("You can also specify the device name on the command line.");
+          errf ("Try -h for help.");
           exit (1);
         }
       else
         {
           dev_name = globbuf.gl_pathv[0];
-          errf ("%s: found shuttle device:\n%s\n", argv[0], dev_name);
+          errf ("%s: found shuttle device:\n%s", argv[0], dev_name);
         }
     }
   else
@@ -365,7 +365,7 @@ main (int argc, char **argv)
                         }
                       else
                         {
-                          errf ("short read: %d\n", o.nread);
+                          errf ("short read: %d", o.nread);
                           break;
                         }
                     }
