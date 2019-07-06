@@ -75,6 +75,57 @@
 #define EVENT_CODE_KEY1 256
 // KEY2 257, etc...
 
+/*
+ * Buttons in the following position:
+ *
+ *    K0  K1  K2  K3
+ *  K4  K5  K6  K7  K8
+ *
+ *  -7 <- Shuttle -> +7
+ *         *  *
+ *      *        *
+ *     * --    ++ *
+ *     *   Jog    *
+ *      *        *
+ *         *  *
+ *
+ *    K9          K10
+ *   K11           K12
+ */
+
+/*
+ * Current config:
+ * No modifier:
+ *   Buttons:
+ *     0  Back
+ *     1  Left Mouse
+ *     2  Right Mouse
+ *     3  Forward
+ *
+ *     4
+ *     5
+ *     6
+ *     7
+ *     8
+ *     9
+ *     10 Left CTRL
+ *     11
+ *     12 KP_Return TODO
+ *   Jog:
+ *     Vertical scrolling
+ *   Shuttle:
+ *     Fast vertical scrolling
+ *
+ * Button 9:
+ *   Jog:
+ *     Horizontal scrolling
+ *
+ * Button 10:
+ *   Jog:
+ *     ++ CTRL-Tab
+ *     -- CTRL-Shift-Tab
+ */
+
 // ev.value when ev.type == KEY
 // 1 -> PRESS; 0 -> RELEASE
 
