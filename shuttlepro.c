@@ -174,9 +174,22 @@ key (unsigned short code, unsigned int value)
 void
 shuttle (int value)
 {
-  prnf ("Shuttle: %d\n", value);
+  prnf ("Shuttle: %d, last: %d", value, shuttlevalue);
   // if value = 0 stop timer
   // [if last value = 0,] start timer with delay = kbd_interval * (1-|value|/7)
+
+  // For now, just use shuttle to scroll quickly
+  if (value == 0)
+    return;
+
+  // TODO This temp variable should be optimised out somehow. I don't like it here
+  uint8_t btn = (value > 0) ? 5 : 4;
+  for (int i = 0; i < abs (value); ++i)
+    {
+      send_button (btn, 1);
+      send_button (btn, 0);
+    }
+  XFlush (display);
 }
 
 void
