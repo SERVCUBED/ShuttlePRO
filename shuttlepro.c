@@ -32,15 +32,17 @@ unsigned int kbd_interval = 200;
 #define ISPRESSED(btn) ISSET(buttonsPressed, btn)
 
 #define NUM_KEYMAP_COMMANDS 4
-typedef struct _keymapcommand {
-    void (*f) (char *);
+typedef struct keymapCommand {
+    void (*f) (char *, uint);
     char *arg;
 } keymapCommand;
 
-void _printf (char *a)
-{ printf ("%s\n", a); }
+void _printf (char *a, uint v)
+{ printf ("%s, Value: %i", a, v); }
 keymapCommand keymapCommands[NUM_KEYMAP_COMMANDS] = {{&_printf, "Command 1"},
-                                                     {&_printf, "Command 2"}};
+                                                     {&_printf, "Command 2"}/*,
+                                                     {&_printf, "Command 3"},
+                                                     {&_printf, "Command 4"}*/};
 
 typedef struct _keymapvalue {
     uint value:29;
@@ -54,10 +56,11 @@ typedef struct _keymapvalue {
 #define KMV_CODE_COMMAND = 3
 
 const uint16_t keymapsMask[NUM_KEYMAPS - 1] = {1u << 10u, 1u << 9u};
+// NOTE: Must keep the very first element zeroed (see getKeymap).
 const keymapValue keymap[NUM_KEYMAPS][NUM_KEYS] = {
-    {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0,                  0}, {0,                      0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
-    {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0,                  0}, {0,                      0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},
-    {{1, 1}, {3, 1}, {0, 3}, {1, 3}, {XK_Pointer_Button1, 0}, {XK_Pointer_DfltBtnPrev, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {37, 0}, {0, 0}, {0, 0}}};
+    {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0,  0}, {0, 0}, {0, 0}},
+    {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {1, 1}, {0, 0}, {0, 0}, {0, 0}, {0,  0}, {0, 0}, {0, 0}},
+    {{8, 1}, {1, 1}, {3, 1}, {9, 1}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {37, 0}, {0, 0}, {0, 0}}};
 
 Display *display;
 
@@ -153,12 +156,11 @@ key (unsigned short code, unsigned int value)
             send_button_to_active (km->value, value);
           break;
           case 0b11:
-            if (value)
-              {
-                keymapCommand kc = keymapCommands[km->value];
-                kc.f (kc.arg);
-              }
-          return;
+            {
+              keymapCommand kc = keymapCommands[km->value];
+              kc.f (kc.arg, value);
+              return; // Commands must flush the server themselves
+            }
         }
       // Switch to XSync instead?
       XFlush (display);
