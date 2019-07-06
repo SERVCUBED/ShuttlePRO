@@ -182,7 +182,7 @@ shuttle (int value)
 void
 jog (bool direction)
 {
-  prnf ("Jog: %d", direction);
+  prnf ("Jog: %d, %i", direction, jogvalue);
   if (ISPRESSED (10u))
     {
       if (!direction)
@@ -194,8 +194,9 @@ jog (bool direction)
     }
   else
     {
-      send_button (direction ? 4 : 5, 1);
-      send_button (direction ? 4 : 5, 0);
+      uint8_t button = ISPRESSED (9u) ? (direction ? 7 : 6) : (direction ? 5 : 4);
+      send_button (button, 1);
+      send_button (button, 0);
     }
   XFlush (display);
 }
@@ -233,10 +234,14 @@ handle_event (EV ev, int count)
                     }
                   break;
                 }
-              if (((uint) ev[i].value ^ (uint) jogvalue) & 1u)
-                {
-                  jog (ev[i].value > jogvalue);
-                }
+              if (((uint) ev[i].value ^ jogvalue) & 1u)
+                jog (ev[i].value > jogvalue);
+              else if ((jogvalue ^ (uint) ev[i].value) == 254u)
+                // Quick fix for skipping zero jumps:
+                // 255 -> 1, 1 -> 255
+                jog (ev[i].value < jogvalue);
+
+              prnf ("%d, %d", jogvalue, ev[i].value);
               jogvalue = ev[i].value;
             }
           break;
@@ -284,10 +289,10 @@ main (int argc, char **argv)
         {
           case 'h':
             help (argv[0]);
-            exit (0);
+          exit (0);
           case 'p':
             o.hotplug = 1;
-            break;
+          break;
           default:
             errf ("Try -h for help.");
           exit (1);
