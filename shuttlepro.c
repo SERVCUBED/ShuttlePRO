@@ -205,6 +205,12 @@ jog (bool direction)
       if (!direction)
         send_key (50, 0);
     }
+  else if (ISPRESSED (12u))
+    {
+      uint8_t button = direction ? 117 : 112;
+      send_key (button, 1);
+      send_key (button, 0);
+    }
   else
     {
       uint8_t button = ISPRESSED (9u) ? (direction ? 7 : 6) : (direction ? 5 : 4);
@@ -254,7 +260,6 @@ handle_event (EV ev, int count)
                 // 255 -> 1, 1 -> 255
                 jog (ev[i].value < jogvalue);
 
-              prnf ("%d, %d", jogvalue, ev[i].value);
               jogvalue = ev[i].value;
             }
           break;

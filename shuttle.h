@@ -124,6 +124,11 @@
  *   Jog:
  *     ++ CTRL-Tab
  *     -- CTRL-Shift-Tab
+ *
+ * Button 12:
+ *   Jog:
+ *     ++ Page Down
+ *     -- Page Up
  */
 
 // ev.value when ev.type == KEY
