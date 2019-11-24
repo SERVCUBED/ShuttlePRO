@@ -25,7 +25,6 @@ all: shuttlepro
 install: all
 	install -d $(bindir) $(datadir) $(mandir)
 	install shuttlepro $(bindir)
-	install -m 0644 example.shuttlerc $(datadir)/shuttlerc
 # If present, the manual page will be installed along with the program.
 ifneq ($(findstring shuttlepro.1, $(INSTALL_TARGETS)),)
 	install -m 0644 shuttlepro.1 $(mandir)
