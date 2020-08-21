@@ -125,6 +125,14 @@
  *     ++ CTRL-Tab
  *     -- CTRL-Shift-Tab
  *
+ * Button 11:
+ *   Jog:
+ *     ++ Right arrow
+ *     -- Left arrow
+ *   Shuttle:
+ *     ++ Up arrow
+ *     -- Down arrow
+ *
  * Button 12:
  *   Jog:
  *     ++ Page Down

@@ -182,12 +182,21 @@ shuttle (int value)
   if (value == 0)
     return;
 
-  // TODO This temp variable should be optimised out somehow. I don't like it here
-  uint8_t btn = (value > 0) ? 5 : 4;
-  for (int i = 0; i < abs (value); ++i)
+  if (ISPRESSED (11u))
     {
-      send_button (btn, 1);
-      send_button (btn, 0);
+      uint8_t btn = (value > 0) ? 116 : 111;
+      send_key (btn, 1);
+      send_key (btn, 0);
+    }
+  else
+    {
+      // TODO This temp variable should be optimised out somehow. I don't like it here
+      uint8_t btn = (value > 0) ? 5 : 4;
+      for (int i = 0; i < abs (value); ++i)
+        {
+          send_button (btn, 1);
+          send_button (btn, 0);
+        }
     }
   XFlush (display);
 }
@@ -204,6 +213,12 @@ jog (bool direction)
       send_key (23, 0);
       if (!direction)
         send_key (50, 0);
+    }
+  else if (ISPRESSED (11u))
+    {
+      uint8_t button = direction ? 114 : 113;
+      send_key (button, 1);
+      send_key (button, 0);
     }
   else if (ISPRESSED (12u))
     {
